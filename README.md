@@ -1,6 +1,6 @@
 # todomvc
 
-TodoMVC written for Flutter
+TodoMVC (kind of) written for Flutter
 
 ## Getting Started
 
