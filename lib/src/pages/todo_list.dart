@@ -80,6 +80,24 @@ class TodoListState extends State<TodoList> {
       appBar: new AppBar(
         title: new Text('todos'),
       ),
+      drawer: new Drawer(
+        child: new ListView(
+          primary: false,
+          children: <Widget>[
+            new DrawerHeader(
+              child: new Text('Todo MVC'),
+            ),
+            new ListTile(
+              title: new Text('Logout', textAlign: TextAlign.right),
+              trailing: new Icon(Icons.exit_to_app),
+              onTap: () async {
+                await signOutWithGoogle();
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+            ),
+          ],
+        ),
+      ),
       body: new Column(
         children: <Widget>[
           new TodoHeaderWidget(
