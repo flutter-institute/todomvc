@@ -10,11 +10,17 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    signInWithGoogle().then((user) {
-      if (user != null) {
-        Navigator.of(context).pushReplacementNamed('/todos');
-      }
+    // Listen for our auth even (on reload or start)
+    // Go to our /todos page once logged in
+    _auth.onAuthStateChanged
+        .firstWhere((user) => user != null)
+        .then((user) {
+      Navigator.of(context).pushReplacementNamed('/todos');
     });
+
+    // Give the navigation animations, etc, some time to finish
+    new Future.delayed(new Duration(seconds: 1))
+        .then((_) => signInWithGoogle());
   }
 
   @override

@@ -78,14 +78,19 @@ class TodoListState extends State<TodoList> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('todos'),
+        title: new Text('Todos'),
       ),
       drawer: new Drawer(
         child: new ListView(
           primary: false,
           children: <Widget>[
             new DrawerHeader(
-              child: new Text('Todo MVC'),
+              child: new Center(
+                child: new Text(
+                  "Todo MVC",
+                  style: Theme.of(context).textTheme.title,
+                ),
+              ),
             ),
             new ListTile(
               title: new Text('Logout', textAlign: TextAlign.right),
