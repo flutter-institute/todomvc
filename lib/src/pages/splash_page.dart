@@ -10,7 +10,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
 
-    // Listen for our auth even (on reload or start)
+    // Listen for our auth event (on reload or start)
     // Go to our /todos page once logged in
     _auth.onAuthStateChanged
         .firstWhere((user) => user != null)
@@ -25,20 +25,6 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new CircularProgressIndicator(),
-              new SizedBox(width: 20.0),
-              new Text("Please wait..."),
-            ],
-          ),
-        ],
-      ),
-    );
+    return new LoadingIndicator();
   }
 }

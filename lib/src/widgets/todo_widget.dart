@@ -5,6 +5,7 @@ part of todomvc;
 
 class TodoWidget extends StatefulWidget {
   final TodoItem todo;
+  final bool disabled;
   final ValueChanged<bool> onToggle;
   final ValueChanged<String> onTitleChanged;
   final VoidCallback onDelete;
@@ -12,6 +13,7 @@ class TodoWidget extends StatefulWidget {
   TodoWidget({
     Key key,
     @required this.todo,
+    this.disabled = false,
     this.onToggle,
     this.onTitleChanged,
     this.onDelete,
@@ -54,10 +56,16 @@ class _TodoWidgetState extends State<TodoWidget> {
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    TextStyle titleStyle = theme.textTheme.body1;
+    if (widget.disabled) {
+      titleStyle = titleStyle.copyWith(color: Colors.grey);
+    }
+
     return new GestureDetector(
-      child: new Text(widget.todo.title),
-      onLongPress: () {
+      child: new Text(widget.todo.title, style: titleStyle),
+      onLongPress: widget.disabled ? null : () {
         // Long press to edit
         if (widget.onTitleChanged != null) {
           setState(() {
@@ -70,13 +78,13 @@ class _TodoWidgetState extends State<TodoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final Widget titleChild = _editMode ? _buildEditTitle() : _buildTitle();
+    final Widget titleChild = (!widget.disabled && _editMode) ? _buildEditTitle() : _buildTitle(context);
 
     return new Row(
       children: <Widget>[
         new Checkbox(
           value: widget.todo.completed,
-          onChanged: widget.onToggle,
+          onChanged: widget.disabled ? null : widget.onToggle,
         ),
         new Expanded(
           flex: 2,
@@ -84,7 +92,7 @@ class _TodoWidgetState extends State<TodoWidget> {
         ),
         new IconButton(
           icon: new Icon(Icons.delete),
-          onPressed: widget.onDelete,
+          onPressed: widget.disabled ? null : widget.onDelete,
         ),
       ],
     );

@@ -5,6 +5,7 @@ library todomvc;
 
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -13,7 +14,9 @@ import 'package:meta/meta.dart';
 part 'pages/splash_page.dart';
 part 'pages/todo_list.dart';
 part 'models/todo_item.dart';
+part 'services/todo_storage.dart';
 part 'util/authentication.dart';
+part 'widgets/loading_indicator.dart';
 part 'widgets/todo_header.dart';
 part 'widgets/todo_widget.dart';
 

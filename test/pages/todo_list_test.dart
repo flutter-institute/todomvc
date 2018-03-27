@@ -6,8 +6,30 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:todomvc/src/todo_app.dart';
 
+import '../mocks/firebase_auth.dart';
+import '../mocks/cloud_firestore.dart';
+
+const String mockUid = '12345';
+
 void main() {
+  FirebaseAuthMock firebaseAuthMock = new FirebaseAuthMock();
+  CloudFirestoreMock cloudFirestoreMock = new CloudFirestoreMock();
+
   Future<Null> createSUT(WidgetTester tester, {List<TodoItem> todos, TypeFilter filter}) async {
+    // Initialize our auth
+    firebaseAuthMock.setUp(mockUid: mockUid);
+
+    // Initialize our data store
+    final Map<String, dynamic> mockTodos = {};
+    todos?.forEach((todoItem) {
+      final Map<String, dynamic> todo = todoItem.toMap();
+      todo['uid'] = mockUid;
+
+      mockTodos['todos/${todoItem.id}'] = todo;
+    });
+    cloudFirestoreMock.setUp(mockTodos);
+
+    // Initialize our test widget
     await tester.pumpWidget(
         new MaterialApp(
           home: new Material(
@@ -15,28 +37,18 @@ void main() {
           ),
         ));
 
-    // Flags for our change requirements
-    final bool setTodos = todos != null && todos.isNotEmpty;
-    final bool setFilter = filter != null;
-
-    if (setTodos || setFilter) {
+    // Set our state filter, if we want to
+    if (filter != null) {
       final TodoListState listState = tester.state<TodoListState>(find.byType(TodoList));
-      listState.setState(() {
-        if (setTodos) {
-          listState.todos = todos;
-        }
-        if (setFilter) {
-          listState.typeFilter = filter;
-        }
-      });
-
-      await tester.pump();
+      listState.setFilter(filter);
     }
+
+    await tester.pump();
   }
 
   testWidgets('Renders an empty page on first load', (WidgetTester tester) async {
     await createSUT(tester);
-    expect(find.byKey(new Key('todo-list')), findsOneWidget);
+    expect(find.byKey(const Key('todo-list')), findsOneWidget);
     expect(find.byType(TodoWidget), findsNothing);
   });
 
@@ -46,7 +58,7 @@ void main() {
       new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),
       new TodoItem(id: 'third', title: 'Third Todo - Active'),
     ]);
-    expect(find.byKey(new Key('todo-list')), findsOneWidget);
+    expect(find.byKey(const Key('todo-list')), findsOneWidget);
     expect(find.byType(TodoWidget), findsNWidgets(3));
   });
 
@@ -58,7 +70,7 @@ void main() {
     ]);
 
     // Click the active filter
-    await tester.tap(find.byKey(new Key('filter-button-active')));
+    await tester.tap(find.byKey(const Key('filter-button-active')));
     await tester.pump();
 
     final Finder activeTodos = find.byType(TodoWidget);
@@ -69,7 +81,7 @@ void main() {
     expect(visibleWidget.todo.id, 'third');
 
     // Click the completed filter
-    await tester.tap(find.byKey(new Key('filter-button-completed')));
+    await tester.tap(find.byKey(const Key('filter-button-completed')));
     await tester.pump();
 
     final Finder completedTodos = find.byType(TodoWidget);
@@ -78,7 +90,7 @@ void main() {
     expect(visibleWidget.todo.id, 'second');
 
     // Click the all filter
-    await tester.tap(find.byKey(new Key('filter-button-all')));
+    await tester.tap(find.byKey(const Key('filter-button-all')));
     await tester.pump();
 
     expect(find.byType(TodoWidget), findsNWidgets(3));

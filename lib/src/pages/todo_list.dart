@@ -21,22 +21,54 @@ class TodoList extends StatefulWidget {
 class TodoListState extends State<TodoList> {
   TypeFilter typeFilter;
   List<TodoItem> todos;
+  /// List of Todos that are disabled in the UI while async operations are performed
+  Set<String> disabledTodos;
+
+  StreamSubscription<QuerySnapshot> todoSub;
+  TodoStorage todoStorage;
+  FirebaseUser user;
 
   @override
   void initState() {
     super.initState();
     typeFilter = TypeFilter.ALL;
     todos = [];
+    disabledTodos = new Set();
+
+    _auth.currentUser().then((FirebaseUser user) {
+      if (user == null) {
+        Navigator.of(context).pushReplacementNamed('/');
+      } else {
+        todoStorage = new TodoStorage.forUser(user: user);
+        todoSub?.cancel();
+        todoSub = todoStorage.list().listen((QuerySnapshot snapshot) {
+          final List<TodoItem> todos = snapshot.documents.map(TodoStorage.fromDocument).toList(growable: false);
+          setState(() {
+            this.todos = todos;
+          });
+        });
+
+        setState(() {
+          this.user = user;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    todoSub?.cancel();
+    super.dispose();
   }
 
   void setFilter(TypeFilter filter) {
     setState(() {
-      this.typeFilter = filter;
+      typeFilter = filter;
     });
   }
 
   Widget buildToggleButton(TypeFilter type, String text) {
-    final bool enabled = type == this.typeFilter;
+    final bool enabled = type == typeFilter;
 
     Widget button = new MaterialButton(
       key: new Key('filter-button-${text.toLowerCase()}'),
@@ -60,50 +92,20 @@ class TodoListState extends State<TodoList> {
     return button;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // Apply our filter. If no filter just copy list, otherwise check the completed status
-    // This is done at build time to simply our state and what we must keep track of
-    final bool onlyActive = this.typeFilter == TypeFilter.ACTIVE;
-    final List<TodoItem> visibleTodos = typeFilter == TypeFilter.ALL
-        ? todos
-        : todos.where((t) => t.completed != onlyActive).toList(growable: false);
+  Widget buildContent(int remainingActive) {
+    if (user == null) {
+      return new LoadingIndicator();
+    } else {
+      // Apply our filter. If no filter just copy list, otherwise check the completed status
+      // This is done at build time to simply our state and what we must keep track of
+      final bool onlyActive = typeFilter == TypeFilter.ACTIVE;
+      final List<TodoItem> visibleTodos = typeFilter == TypeFilter.ALL
+          ? todos
+          : todos.where((t) => t.completed != onlyActive).toList(growable: false);
 
-    // Number of remaining tasks to complete
-    final int remainingActive = todos
-        .where((t) => !t.completed)
-        .length;
+      final bool allCompleted = todos.isNotEmpty && remainingActive == 0;
 
-    final bool allCompleted = todos.isNotEmpty && remainingActive == 0;
-
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Todos'),
-      ),
-      drawer: new Drawer(
-        child: new ListView(
-          primary: false,
-          children: <Widget>[
-            new DrawerHeader(
-              child: new Center(
-                child: new Text(
-                  "Todo MVC",
-                  style: Theme.of(context).textTheme.title,
-                ),
-              ),
-            ),
-            new ListTile(
-              title: new Text('Logout', textAlign: TextAlign.right),
-              trailing: new Icon(Icons.exit_to_app),
-              onTap: () async {
-                await signOutWithGoogle();
-                Navigator.of(context).pushReplacementNamed('/');
-              },
-            ),
-          ],
-        ),
-      ),
-      body: new Column(
+      return new Column(
         children: <Widget>[
           new TodoHeaderWidget(
             key: new Key('todo-header'),
@@ -117,13 +119,53 @@ class TodoListState extends State<TodoList> {
           new Expanded(
             flex: 2,
             child: new ListView.builder(
-              key: new Key('todo-list'),
+              key: const Key('todo-list'),
               itemCount: visibleTodos.length,
               itemBuilder: _buildTodoItem(visibleTodos),
             ),
           ),
         ],
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Number of remaining tasks to complete
+    final int remainingActive = todos
+        .where((t) => !t.completed)
+        .length;
+
+    final ThemeData themeData = Theme.of(context);
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('Todos'),
       ),
+      drawer: new Drawer(
+        child: new ListView(
+          primary: false,
+          children: <Widget>[
+            new DrawerHeader(
+              child: new Center(
+                child: new Text(
+                  "Todo MVC",
+                  style: themeData.textTheme.title,
+                ),
+              ),
+            ),
+            new ListTile(
+              title: const Text('Logout', textAlign: TextAlign.right),
+              trailing: const Icon(Icons.exit_to_app),
+              onTap: () async {
+                await signOutWithGoogle();
+                Navigator.of(context).pushReplacementNamed('/');
+              },
+            ),
+          ],
+        ),
+      ),
+      body: buildContent(remainingActive),
       bottomNavigationBar: new Padding(
         padding: const EdgeInsets.all(10.0),
         child: new Stack(
@@ -154,41 +196,63 @@ class TodoListState extends State<TodoList> {
       return new TodoWidget(
         key: new Key('todo-${todo.id}'),
         todo: todo,
+        disabled: disabledTodos.contains(todo.id),
         onToggle: (completed) {
-          setState(() {
-            todo.completed = completed;
-          });
+          this._toggleTodo(todo, completed);
         },
         onTitleChanged: (newTitle) {
           this._editTodo(todo, newTitle);
         },
         onDelete: () {
-          setState(() {
-            this.todos.removeWhere((t) => t.id == todo.id);
-          });
+          this._deleteTodo(todo);
         },
       );
     };
   }
 
-  void _toggleAll(bool toggled) {
+  void _disableTodo(TodoItem todo) {
     setState(() {
-      todos.forEach((t) => t.completed = toggled);
+      disabledTodos.add(todo.id);
     });
   }
 
-  void _createTodo(String title) {
+  void _enabledTodo(TodoItem todo) {
     setState(() {
-      todos.add(new TodoItem(
-        id: todos.length.toString(),
-        title: title,
-      ));
+      disabledTodos.remove(todo.id);
+    });
+  }
+
+  void _toggleAll(bool toggled) {
+    todos.forEach((t) => this._toggleTodo(t, toggled));
+  }
+
+  void _createTodo(String title) {
+    todoStorage.create(title);
+  }
+
+  void _deleteTodo(TodoItem todo) {
+    this._disableTodo(todo);
+    todoStorage.delete(todo.id)
+        .catchError((_) {
+      this._enabledTodo(todo);
+    });
+  }
+
+  void _toggleTodo(TodoItem todo, bool completed) {
+    this._disableTodo(todo);
+    todo.completed = completed;
+    todoStorage.update(todo)
+        .whenComplete(() {
+      this._enabledTodo(todo);
     });
   }
 
   void _editTodo(TodoItem todo, String newTitle) {
-    setState(() {
-      todo.title = newTitle;
+    this._disableTodo(todo);
+    todo.title = newTitle;
+    todoStorage.update(todo)
+        .whenComplete(() {
+      this._enabledTodo(todo);
     });
   }
 }
