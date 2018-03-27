@@ -17,8 +17,7 @@ class TodoWidget extends StatefulWidget {
     this.onToggle,
     this.onTitleChanged,
     this.onDelete,
-  })
-      : assert(todo != null),
+  })  : assert(todo != null),
         super(key: key);
 
   @override
@@ -65,14 +64,16 @@ class _TodoWidgetState extends State<TodoWidget> {
 
     return new GestureDetector(
       child: new Text(widget.todo.title, style: titleStyle),
-      onLongPress: widget.disabled ? null : () {
-        // Long press to edit
-        if (widget.onTitleChanged != null) {
-          setState(() {
-            _editMode = true;
-          });
-        }
-      },
+      onLongPress: widget.disabled
+          ? null
+          : () {
+              // Long press to edit
+              if (widget.onTitleChanged != null) {
+                setState(() {
+                  _editMode = true;
+                });
+              }
+            },
     );
   }
 

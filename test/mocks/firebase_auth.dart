@@ -7,10 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:channel_mock/channel_mock.dart';
 
-
 class FirebaseAuthMock extends ChannelMock {
-  FirebaseAuthMock()
-      : super(FirebaseAuth.channel);
+  FirebaseAuthMock() : super(FirebaseAuth.channel);
 
   Map<String, dynamic> setUp({
     mockIdToken = '12345',
@@ -34,11 +32,10 @@ class FirebaseAuthMock extends ChannelMock {
 
     when('startListeningAuthState').thenRespond(
       'onAuthStateChanged',
-          (handle, _) =>
-      <String, dynamic>{
-        'id': handle,
-        'user': mockUser,
-      },
+      (handle, _) => <String, dynamic>{
+            'id': handle,
+            'user': mockUser,
+          },
     );
 
     otherwise().thenReturn(mockUser);

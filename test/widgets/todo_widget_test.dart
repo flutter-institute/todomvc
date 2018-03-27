@@ -11,15 +11,16 @@ void main() {
     final TodoItem todo = new TodoItem(id: 'id', title: 'test');
     bool value;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoWidget(
-              todo: todo,
-              onToggle: (v) { value = v; },
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoWidget(
+          todo: todo,
+          onToggle: (v) {
+            value = v;
+          },
+        ),
+      ),
+    ));
     expect(value, isNull);
 
     final Checkbox box = tester.widget(find.byType(Checkbox));
@@ -33,15 +34,16 @@ void main() {
     final TodoItem todo = new TodoItem(id: 'id', title: 'test', completed: true);
     bool value;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoWidget(
-              todo: todo,
-              onToggle: (v) { value = v; },
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoWidget(
+          todo: todo,
+          onToggle: (v) {
+            value = v;
+          },
+        ),
+      ),
+    ));
     expect(value, isNull);
 
     final Checkbox box = tester.widget(find.byType(Checkbox));
@@ -55,15 +57,16 @@ void main() {
     final TodoItem todo = new TodoItem(id: 'id', title: 'test', completed: true);
     bool called;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoWidget(
-              todo: todo,
-              onDelete: () { called = true; },
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoWidget(
+          todo: todo,
+          onDelete: () {
+            called = true;
+          },
+        ),
+      ),
+    ));
     expect(called, isNull);
 
     await tester.tap(find.byType(IconButton));
@@ -74,17 +77,16 @@ void main() {
     final TodoItem todo = new TodoItem(id: 'id', title: 'test', completed: true);
     String value;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoWidget(
-              todo: todo,
-              onTitleChanged: (newTitle) {
-                value = newTitle;
-              },
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoWidget(
+          todo: todo,
+          onTitleChanged: (newTitle) {
+            value = newTitle;
+          },
+        ),
+      ),
+    ));
     expect(value, isNull);
 
     Text titleText = tester.widget(find.byType(Text));

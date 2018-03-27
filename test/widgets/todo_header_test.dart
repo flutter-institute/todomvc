@@ -11,17 +11,16 @@ void main() {
     Key inputKey = new UniqueKey();
     String value;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoHeaderWidget(
-              textInputKey: inputKey,
-              onAddTodo: (title) {
-                value = title;
-              },
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoHeaderWidget(
+          textInputKey: inputKey,
+          onAddTodo: (title) {
+            value = title;
+          },
+        ),
+      ),
+    ));
     expect(value, isNull);
 
     await tester.enterText(find.byKey(inputKey), "test-todo\n");
@@ -36,18 +35,17 @@ void main() {
   testWidgets('Shows the toggle button', (WidgetTester tester) async {
     bool called = false;
 
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoHeaderWidget(
-              showToggleAll: true,
-              onChangeToggleAll: () {
-                called = true;
-              },
-              onAddTodo: (title) {},
-            ),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoHeaderWidget(
+          showToggleAll: true,
+          onChangeToggleAll: () {
+            called = true;
+          },
+          onAddTodo: (title) {},
+        ),
+      ),
+    ));
     expect(called, isFalse);
 
     await tester.tap(find.byType(IconButton));

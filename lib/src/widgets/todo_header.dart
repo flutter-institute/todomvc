@@ -29,8 +29,7 @@ class TodoHeaderWidget extends StatelessWidget {
     this.toggleAllActive = false,
     this.onChangeToggleAll,
     @required this.onAddTodo,
-  })
-      : assert(onAddTodo != null),
+  })  : assert(onAddTodo != null),
         super(key: key);
 
   @override

@@ -10,17 +10,16 @@ enum TypeFilter {
   COMPLETED,
 }
 
-
 class TodoList extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => new TodoListState();
 }
 
-
 /// The bulk of the app's "smarts" are in this class
 class TodoListState extends State<TodoList> {
   TypeFilter typeFilter;
   List<TodoItem> todos;
+
   /// List of Todos that are disabled in the UI while async operations are performed
   Set<String> disabledTodos;
 
@@ -99,9 +98,8 @@ class TodoListState extends State<TodoList> {
       // Apply our filter. If no filter just copy list, otherwise check the completed status
       // This is done at build time to simply our state and what we must keep track of
       final bool onlyActive = typeFilter == TypeFilter.ACTIVE;
-      final List<TodoItem> visibleTodos = typeFilter == TypeFilter.ALL
-          ? todos
-          : todos.where((t) => t.completed != onlyActive).toList(growable: false);
+      final List<TodoItem> visibleTodos =
+          typeFilter == TypeFilter.ALL ? todos : todos.where((t) => t.completed != onlyActive).toList(growable: false);
 
       final bool allCompleted = todos.isNotEmpty && remainingActive == 0;
 
@@ -132,9 +130,7 @@ class TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     // Number of remaining tasks to complete
-    final int remainingActive = todos
-        .where((t) => !t.completed)
-        .length;
+    final int remainingActive = todos.where((t) => !t.completed).length;
 
     final ThemeData themeData = Theme.of(context);
 
@@ -232,8 +228,7 @@ class TodoListState extends State<TodoList> {
 
   void _deleteTodo(TodoItem todo) {
     this._disableTodo(todo);
-    todoStorage.delete(todo.id)
-        .catchError((_) {
+    todoStorage.delete(todo.id).catchError((_) {
       this._enabledTodo(todo);
     });
   }
@@ -241,8 +236,7 @@ class TodoListState extends State<TodoList> {
   void _toggleTodo(TodoItem todo, bool completed) {
     this._disableTodo(todo);
     todo.completed = completed;
-    todoStorage.update(todo)
-        .whenComplete(() {
+    todoStorage.update(todo).whenComplete(() {
       this._enabledTodo(todo);
     });
   }
@@ -250,8 +244,7 @@ class TodoListState extends State<TodoList> {
   void _editTodo(TodoItem todo, String newTitle) {
     this._disableTodo(todo);
     todo.title = newTitle;
-    todoStorage.update(todo)
-        .whenComplete(() {
+    todoStorage.update(todo).whenComplete(() {
       this._enabledTodo(todo);
     });
   }

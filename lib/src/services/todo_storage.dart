@@ -7,8 +7,7 @@ class TodoStorage {
 
   TodoStorage.forUser({
     @required this.user,
-  })
-      : assert(user != null);
+  }) : assert(user != null);
 
   static TodoItem fromDocument(DocumentSnapshot document) => _fromMap(document.data);
 
@@ -25,12 +24,9 @@ class TodoStorage {
     return result;
   }
 
-  /// Make sure we are always filtering by the userId
-  Query get _query => todoCollection.where('uid', isEqualTo: this.user.uid);
-
   /// Returns a stream of data snapshots for the user, paginated using limit/offset
-  Stream<QuerySnapshot> list({ int limit, int offset }) {
-    Stream<QuerySnapshot> snapshots = _query.snapshots;
+  Stream<QuerySnapshot> list({int limit, int offset}) {
+    Stream<QuerySnapshot> snapshots = todoCollection.where('uid', isEqualTo: this.user.uid).snapshots;
     if (offset != null) {
       snapshots = snapshots.skip(offset);
     }
@@ -53,9 +49,7 @@ class TodoStorage {
       return data;
     };
 
-    return Firestore.instance.runTransaction(createTransaction)
-        .then(_fromMap)
-        .catchError((e) {
+    return Firestore.instance.runTransaction(createTransaction).then(_fromMap).catchError((e) {
       print('dart error: $e');
       return null;
     });
@@ -73,9 +67,7 @@ class TodoStorage {
       return {'result': true};
     };
 
-    return Firestore.instance.runTransaction(updateTransaction)
-        .then((r) => r['result'])
-        .catchError((e) {
+    return Firestore.instance.runTransaction(updateTransaction).then((r) => r['result']).catchError((e) {
       print('dart error: $e');
       return false;
     });
@@ -93,9 +85,7 @@ class TodoStorage {
       return {'result': true};
     };
 
-    return Firestore.instance.runTransaction(deleteTransaction)
-        .then((r) => r['result'])
-        .catchError((e) {
+    return Firestore.instance.runTransaction(deleteTransaction).then((r) => r['result']).catchError((e) {
       print('dart error: $e}');
       return false;
     });

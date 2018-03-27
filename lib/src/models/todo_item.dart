@@ -13,17 +13,16 @@ class TodoItem {
     @required this.id,
     @required this.title,
     this.completed = false,
-  })
-      : assert(id != null && id.isNotEmpty),
+  })  : assert(id != null && id.isNotEmpty),
         assert(title != null && title.isNotEmpty),
         assert(completed != null);
 
   TodoItem.fromMap(Map<String, dynamic> data)
-    : this(id: data['id'], title: data['title'], completed: data['completed'] ?? false);
+      : this(id: data['id'], title: data['title'], completed: data['completed'] ?? false);
 
   Map<String, dynamic> toMap() => {
-    'id': this.id,
-    'title': this.title,
-    'completed': this.completed,
-  };
+        'id': this.id,
+        'title': this.title,
+        'completed': this.completed,
+      };
 }

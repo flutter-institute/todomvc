@@ -30,12 +30,11 @@ void main() {
     cloudFirestoreMock.setUp(mockTodos);
 
     // Initialize our test widget
-    await tester.pumpWidget(
-        new MaterialApp(
-          home: new Material(
-            child: new TodoList(),
-          ),
-        ));
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new TodoList(),
+      ),
+    ));
 
     // Set our state filter, if we want to
     if (filter != null) {
@@ -131,7 +130,8 @@ void main() {
   });
 
   testWidgets('toggles a widget properly out of the filtered group', (WidgetTester tester) async {
-    await createSUT(tester,
+    await createSUT(
+      tester,
       todos: <TodoItem>[
         new TodoItem(id: 'first', title: 'First Todo - Active'),
         new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),
@@ -155,7 +155,8 @@ void main() {
   });
 
   testWidgets('toggles all todos back and forth', (WidgetTester tester) async {
-    await createSUT(tester,
+    await createSUT(
+      tester,
       todos: <TodoItem>[
         new TodoItem(id: 'first', title: 'First Todo - Active'),
         new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),
@@ -191,7 +192,8 @@ void main() {
   });
 
   testWidgets('creates a new todo at the bottom of the list', (WidgetTester tester) async {
-    await createSUT(tester,
+    await createSUT(
+      tester,
       todos: <TodoItem>[
         new TodoItem(id: 'first', title: 'First Todo - Active'),
         new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),
@@ -217,7 +219,8 @@ void main() {
   });
 
   testWidgets('edits a todo', (WidgetTester tester) async {
-    await createSUT(tester,
+    await createSUT(
+      tester,
       todos: <TodoItem>[
         new TodoItem(id: 'first', title: 'First Todo - Active'),
         new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),
@@ -262,7 +265,8 @@ void main() {
   });
 
   testWidgets('deletes a todo', (WidgetTester tester) async {
-    await createSUT(tester,
+    await createSUT(
+      tester,
       todos: <TodoItem>[
         new TodoItem(id: 'first', title: 'First Todo - Active'),
         new TodoItem(id: 'second', title: 'Second Todo - Completed', completed: true),

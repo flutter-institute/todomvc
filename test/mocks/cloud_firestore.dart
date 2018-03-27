@@ -9,12 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:channel_mock/channel_mock.dart';
 
-
 class CloudFirestoreMock extends ChannelMock {
   List<int> _listenerHandles;
 
-  CloudFirestoreMock()
-      : super(Firestore.channel);
+  CloudFirestoreMock() : super(Firestore.channel);
 
   Map<String, dynamic> _makeQuerySnapshot(int handle, Map<String, dynamic> data) {
     final List<dynamic> documents = data.values.toList();
@@ -22,25 +20,26 @@ class CloudFirestoreMock extends ChannelMock {
       'handle': handle,
       'paths': data.keys.toList(),
       'documents': documents,
-      'documentChanges': documents.map((d) =>
-      <String, dynamic>{
-        'oldIndex': -1,
-        'newIndex': 0,
-        'type': 'DocumentChangeType.added',
-        'document': d,
-      }).toList(),
+      'documentChanges': documents
+          .map((d) => <String, dynamic>{
+                'oldIndex': -1,
+                'newIndex': 0,
+                'type': 'DocumentChangeType.added',
+                'document': d,
+              })
+          .toList(),
     };
   }
 
   Future _notifySnapshotListeners(Map<String, dynamic> data) async {
     if (data?.isNotEmpty == true) {
-      List<Future> messages = _listenerHandles.map((handle) =>
-          BinaryMessages.handlePlatformMessage(
+      List<Future> messages = _listenerHandles
+          .map((handle) => BinaryMessages.handlePlatformMessage(
               Firestore.channel.name,
               Firestore.channel.codec.encodeMethodCall(
                 new MethodCall('QuerySnapshot', _makeQuerySnapshot(handle, data)),
               ),
-                  (_) {}))
+              (_) {}))
           .toList();
 
       await Future.wait(messages);
@@ -74,7 +73,7 @@ class CloudFirestoreMock extends ChannelMock {
         Firestore.channel.codec.encodeMethodCall(
           new MethodCall('DoTransaction', arguments),
         ),
-            (a) {
+        (a) {
           _transactionResult = Firestore.channel.codec.decodeEnvelope(a);
         },
       );
