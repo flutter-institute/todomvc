@@ -26,7 +26,7 @@ class TodoStorage {
 
   /// Returns a stream of data snapshots for the user, paginated using limit/offset
   Stream<QuerySnapshot> list({int limit, int offset}) {
-    Stream<QuerySnapshot> snapshots = todoCollection.where('uid', isEqualTo: this.user.uid).snapshots;
+    Stream<QuerySnapshot> snapshots = todoCollection.where('uid', isEqualTo: this.user.uid).snapshots();
     if (offset != null) {
       snapshots = snapshots.skip(offset);
     }
@@ -67,7 +67,9 @@ class TodoStorage {
       return {'result': true};
     };
 
-    return Firestore.instance.runTransaction(updateTransaction).then((r) => r['result']).catchError((e) {
+    return Firestore.instance.runTransaction(updateTransaction).then((r) {
+      return r['result'] == true; // forcefully cast to boolean
+    }).catchError((e) {
       print('dart error: $e');
       return false;
     });
