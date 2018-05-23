@@ -39,7 +39,7 @@ class TodoStorage {
 
   Future<TodoItem> create(String title) async {
     final TransactionHandler createTransaction = (Transaction tx) async {
-      final DocumentSnapshot newDoc = await tx.get(todoCollection.document());
+      final DocumentSnapshot newDoc = await tx.get(await todoCollection.add({}));
       final TodoItem newItem = new TodoItem(id: newDoc.documentID, title: title);
       final Map<String, dynamic> data = _toMap(newItem, {
         'created': new DateTime.now().toUtc().toIso8601String(),
